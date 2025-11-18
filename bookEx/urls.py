@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 from django.views.generic.base import TemplateView
+from bookMng import views
 from bookMng.views import Register
 
 urlpatterns = [
@@ -29,5 +30,12 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),
     # ratings path
     # path('ratebook/<int:id>/', views.ratebook, name='ratebook'),
+    
+    #--------------------------- ADDED ---------------------------#
+        path("", views.index, name="home"),                              # shows displaybooks.html
+    path("books/", views.displaybooks, name="display-books"),        # optional: direct list route
+    path("books/my/", views.mybooks, name="my-books"),               # your mybooks view
+    path("postbook", views.postbook, name="postbook"),               # keep same path you used
+    path("book_delete/<int:book_id>", views.book_delete, name="book_delete"),
 
 ]

@@ -5,65 +5,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Layout with Banner, Menu, and Content</title>
+    <title>{% block title %}BookEx{% endblock title %}</title>
+
+    <!-- Link to your base stylesheet -->
     <link rel="stylesheet" href="{% static 'base.css' %}" type="text/css">
-  {% block extra_css %}{% endblock %}
-    </head>
+    {% block extra_css %}{% endblock %}
+</head>
 <body>
- <header>
-   <div class="header-top">
-     <div class="banner">
-       <h1>{% block banner_title %}Book Keep{% endblock %}</h1>
-     </div>
-     <div class="auth">
-       {% if user.is_authenticated %}
-         {{ user.username }}
-         <form action="{% url 'logout' %}?next=/" method="post" style="display:inline;margin-left:8px;">
-           {% csrf_token %}
-           <button type="submit">logout</button>
-         </form>
-       {% else %}
-         Not Logged in
-         <a href="{% url 'login' %}?next=/">login</a>
-       {% endif %}
-     </div>
-   </div>
+  <header>
+    <div class="header-top">
+      <div class="banner">
+        <h1>{% block banner_title %}BookEx{% endblock banner_title %}</h1>
+      </div>
+      <div class="auth">
+        {% if user.is_authenticated %}
+          {{ user.username }}
+          <form action="{% url 'logout' %}?next=/" method="post" style="display:inline;margin-left:8px;">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+          </form>
+        {% else %}
+          Not Logged in
+          <a href="{% url 'login' %}?next=/">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
 
-   <nav class="sidebar">
-     <ul>
-       {% block sidenav %}
-         <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
-         <li><a href="{% url 'about' %}">About</a></li>
-         <li><a href="{% url 'postbook' %}">Post Book</a></li>
-         <li>
-           <form action="{% url 'search_books' %}" method="get" class="nav-search" style="display:inline;">
-             <input type="text" name="q" placeholder="Search books..." value="{{ request.GET.q|default:'' }}">
-             <button type="submit">Search</button>
-           </form>
-         </li>
-       {% endblock sidenav %}
-     </ul>
-   </nav>
- </header>
+  <div class="container">
+    <nav class="sidebar">
+      <ul>
+        {% block sidenav %}
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'postbook' %}">Post Book</a></li>
+          {# <li><a href="{% url 'send-message' %}">Send Message</a></li> #}
+          <li><a href="{% url 'register' %}">Register</a></li>
+          <li><a href="{% url 'login' %}">Login</a></li>
+        {% endblock sidenav %}
+      </ul>
+    </nav>
 
-<div class="container">
- <main class="content">
-                 {% if messages %}
-                   <ul class="messages">
-                     {% for message in messages %}
-                       <li class="message {{ message.tags }}">{{ message }}</li>
-                     {% endfor %}
-                   </ul>
-                 {% endif %}
+    <main class="content">
+      {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+            <li class="message {{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
-                 {% block content %}
-               <h1>Main Content</h1>
-            {% endblock content %}
-  </main>
- </div>
+      {% block content %}
+        <h2>Welcome to BookEx</h2>
+        <p>This content will be replaced by each specific page.</p>
+      {% endblock content %}
+    </main>
+  </div>
 
- <footer>
- <p>&copy; 2025 My Web Layout</p>
- </footer>
+  <footer>
+    <p>&copy; 2025 BookEx Project</p>
+  </footer>
 </body>
 </html>

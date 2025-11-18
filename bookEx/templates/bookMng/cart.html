@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block sidenav %}
+  <li><a href="{% url 'home' %}">Home</a></li>
+  <li><a href="{% url 'cart-view' %}">Cart</a></li>
+  <li>
+    <form action="{% url 'search' %}" method="get" style="display:inline;">
+      <input type="text" name="q" placeholder="Search books..." required style="padding:2px 6px;">
+      <button type="submit" style="padding:2px 8px;">Search</button>
+    </form>
+  </li>
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Your Cart</h1>
+
+  {% if items %}
+    <table border="1" cellpadding="6">
+      <tr>
+        <th>Title</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+        <th>Actions</th>
+      </tr>
+      {% for item in items %}
+        <tr>
+          <td><a href="{% url 'book-detail' item.book.pk %}">{{ item.book.name }}</a></td>
+          <td>${{ item.book.price }}</td>
+          <td>{{ item.qty }}</td>
+          <td>${{ item.subtotal|floatformat:2 }}</td>
+          <td>
+            <form action="{% url 'cart-add' item.book.pk %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit">+</button>
+            </form>
+            <form action="{% url 'cart-remove' item.book.pk %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit">−</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <p><strong>Total items:</strong> {{ total_items }}</p>
+    <p><strong>Total price:</strong> ${{ total_price|floatformat:2 }}</p>
+
+    <p>
+      <a href="{% url 'cart-clear' %}">Clear Cart</a>
+    </p>
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
+{% endblock content %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Search Books</h1>
+  <form method="get">
+    {{ form.q }}
+    <button type="submit">Search</button>
+  </form>
+
+  {% if query %}
+    <h3>Results for "{{ query }}":</h3>
+    {% if books %}
+      <ul>
+        {% for b in books %}
+          <li>
+            <a href="{% url 'book-detail' b.pk %}">{{ b.title }}</a>
+            — {{ b.author }} ({{ b.isbn }})
+            <form action="{% url 'cart-add' b.pk %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit">Add to Cart</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No matching books.</p>
+    {% endif %}
+  {% endif %}
+{% endblock content %}

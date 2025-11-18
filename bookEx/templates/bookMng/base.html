@@ -1,0 +1,33 @@
+<!-- FILE: templates/base.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}BookEx{% endblock title %}</title>
+  <link rel="stylesheet" href="{% load static %}{% static 'styles.css' %}">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    header { background: #222; color: #fff; padding: 12px 16px; }
+    .wrap { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    nav { background: #f5f5f5; padding: 12px 16px; }
+    main { padding: 16px 24px; }
+    ul { padding-left: 18px; }
+    a { color: #0366d6; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header><strong>BookEx</strong></header>
+  <div class="wrap">
+    <nav>
+      <ul>
+        {% block sidenav %}
+          <!-- child templates should override this block and render `item_list` -->
+        {% endblock sidenav %}
+      </ul>
+    </nav>
+    <main>
+      {% block content %}{% endblock content %}
+    </main>
+  </div>
+</body>
+</html>

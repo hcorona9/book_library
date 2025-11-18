@@ -1,22 +1,22 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from .models import MainMenu
-from .forms import BookForm
+from .forms import BookForm, ReviewForm, SearchForm
 from django.http import HttpResponseRedirect
 from .models import Book
 from .forms import RatingForm
 from .models import Rating
+from django import forms
 
 from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.db.models import Avg, Count
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
-
-
-
+from django.views.decorators.http import require_POST
+from django.db import models
 
 
 
@@ -72,28 +72,6 @@ def displaybooks(request):
                   })
 
 
-def search_books(request):
-    """Search books by name (case-insensitive). If the query is empty or
-    no matches are found, the page will render with no books shown.
-    """
-    q = request.GET.get('q', '')
-    q = q.strip()
-    if q:
-        books = Book.objects.filter(name__icontains=q).annotate(
-            avg_rating=Avg('rating__value'),
-            rating_count=Count('rating')
-        )
-        for b in books:
-            b.pic_path = b.picture.url[14:]
-    else:
-        # Empty query => show no results (user asked for nothing to appear)
-        books = Book.objects.none()
-
-    return render(request, 'bookMng/displaybooks.html', {
-        'item_list': MainMenu.objects.all(),
-        'books': books,
-        'search_query': q,
-    })
 
 
 class Register(CreateView):
@@ -105,16 +83,52 @@ class Register(CreateView):
         form.save()
         return HttpResponseRedirect(self.success_url)
 
-def book_detail(request, book_id):
-        book = Book.objects.get(id=book_id)
+def book_detail(request, pk):
+    book = get_object_or_404(Book.objects.annotate(
+        avg_rating=Avg('rating__value'),
+        rating_count=Count('rating')
+    ), pk=pk)
 
-        book.pic_path = book.picture.url[14:]
-        return render(request,
-                      'bookMng/book_detail.html',
-                      {
-                          'item_list': MainMenu.objects.all(),
-                          'book': book
-                      })
+    reviews = book.reviews.order_by("-created_at")
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect('register')
+        form = ReviewForm(request.POST, user=request.user)
+        if form.is_valid():
+            r = form.save(commit=False)
+            r.book = book
+            if request.user.is_authenticated:
+                r.reviewer_name = request.user.username
+            r.save()
+            # Refresh book object to update avg_rating and rating_count
+            book = get_object_or_404(Book.objects.annotate(
+                avg_rating=Avg('rating__value'),
+                rating_count=Count('rating')
+            ), pk=pk)
+            reviews = book.reviews.order_by("-created_at")
+            form = ReviewForm(user=request.user)
+            return render(request, "bookMng/book_detail.html", {
+                "book": book,
+                "reviews": reviews,
+                "avg_rating": book.avg_rating,
+                "rating_count": book.rating_count,
+                "form": form,
+                "item_list": []
+            })
+    else:
+        form = ReviewForm(user=request.user)
+        if request.user.is_authenticated:
+            form.fields['reviewer_name'].widget = forms.HiddenInput()
+
+    return render(request, "bookMng/book_detail.html", {
+        "book": book,
+        "reviews": reviews,
+        "avg_rating": book.avg_rating,
+        "rating_count": book.rating_count,
+        "form": form,
+        "item_list": []
+    })
 
 def mybooks(request):
     # If user is not authenticated, don't query or process books — template
@@ -169,41 +183,41 @@ def person_profile(request, slug):
         'hector-corona': {
             'name': 'Hector Corona',
             'title': 'Software Developer',
-            'bio': 'Hector is a student and developer working on web applications. He enjoys building Django projects and learning UI/UX design.',
-            'photo': 'uploads/hector.jpg'
+            'bio': 'Hector is a student at Cal State LA full-time.',
+            'photo': 'uploads/penguin6.jpg'
         }
     }
     # Add more people by adding new slug keys here. Example:
     people['kevin-luo'] = {
         'name': 'Kevin Luo',
         'title': 'Data Scientist',
-        'bio': 'Kevin works on data engineering and machine learning pipelines. He enjoys visualizing data and building analytics tools.',
-        'photo': 'uploads/kevin.jpg'
+        'bio': 'Kevin enjoys visualizing data and building analytics tools.',
+        'photo': 'uploads/penguin5.jpg'
     }
     people['esmeralda-amado'] = {
         'name': 'Esmeralda Amado',
         'title': 'Software Developer',
-        'bio': 'Esmeralda is a student and developer working on web applications. She likes long walks on the beach with her computer to code.',
-        'photo': 'uploads/esmeralda.jpg'
+        'bio': 'Esmeralda is a student and developer working on web applications.',
+        'photo': 'uploads/penguin4.jpg'
     }
     people['evelyn-muneton'] = {
         'name': 'Evelyn Muneton',
         'title': 'Software Developer',
-        'bio': 'Evelyn likes to develop and code super hard.',
-        'photo': 'uploads/evelyn.jpg'
+        'bio': 'Evelyn likes to develop and code in her spare time.',
+        'photo': 'uploads/penguin3.jpg'
     }
     people['raquel-alvarado'] = {
         'name': 'Raquel Alvarado',
         'title': 'Software Developer',
         'bio': 'Raquel has a passion for complex data structures.',
-        'photo': 'uploads/raquel.jpg'
+        'photo': 'uploads/penguin2.jpg'
     }
-    people['brian-gonzales'] = {
-        'name': 'Brian Gonzales',
-        'title': '???',
-        'bio': '???',
-        'photo': 'uploads/brian.jpg'
-    }
+    #people['brian-gonzales'] = {
+    #    'name': 'Brian Gonzales',
+    #    'title': '???',
+    #    'bio': '???',
+    #    'photo': 'uploads/brian.jpg'
+    #}
 
     person = people.get(slug)
     if not person:
@@ -246,4 +260,80 @@ def book_rating(request, book_id):
         'form': form,
         'submitted': submitted,
         'item_list': MainMenu.objects.all()
+    })
+
+#-------------------------------------- ADDED -------------------------------------------------------#
+
+# ---------- SHOPPING CART (SESSION-BASED) ----------
+def _get_cart(session):
+    cart = session.get("cart", {})
+    # cart format: {"book_id": quantity}
+    return cart
+
+def _save_cart(session, cart):
+    session["cart"] = cart
+    session.modified = True
+
+@require_POST
+def cart_add(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    cart = _get_cart(request.session)
+    key = str(book.pk)
+    # allow adding multiple copies via POST 'quantity' (defaults to 1)
+    try:
+        qty = int(request.POST.get('quantity', 1))
+    except Exception:
+        qty = 1
+    if qty < 1:
+        qty = 1
+    cart[key] = cart.get(key, 0) + qty
+    _save_cart(request.session, cart)
+    return redirect("cart-view")
+
+@require_POST
+def cart_remove(request, pk):
+    cart = _get_cart(request.session)
+    key = str(pk)
+    if key in cart:
+        cart[key] -= 1
+        if cart[key] <= 0:
+            cart.pop(key)
+        _save_cart(request.session, cart)
+    return redirect("cart-view")
+
+def cart_clear(request):
+    _save_cart(request.session, {})
+    return redirect("cart-view")
+
+def cart_view(request):
+    cart = _get_cart(request.session)
+    ids = [int(i) for i in cart.keys()]
+    books = Book.objects.filter(id__in=ids)
+    items = []
+    total_items = 0
+    total_price = 0
+    for b in books:
+        qty = cart.get(str(b.id), 0)
+        total_items += qty
+        subtotal = b.price * qty
+        total_price += subtotal
+        items.append({"book": b, "qty": qty, "subtotal": subtotal})
+    return render(request, "bookMng/cart.html", {
+        "items": items, "total_items": total_items, "total_price": total_price, "item_list": []
+    })
+
+# ---------- SIMPLE SEARCH ----------
+def search(request):
+    form = SearchForm(request.GET or None)
+    books = []
+    query = ""
+    if form.is_valid():
+        query = form.cleaned_data.get("q", "").strip()
+        if query:
+            books = Book.objects.filter(
+                models.Q(name__icontains=query) |
+                models.Q(web__icontains=query)
+            ).order_by("name")
+    return render(request, "bookMng/search.html", {
+        "form": form, "query": query, "books": books, "item_list": []
     })

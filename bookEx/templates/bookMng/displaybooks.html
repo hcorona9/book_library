@@ -6,100 +6,81 @@
 {% endblock %}
 
 {% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
+  <li><a href="{% url 'cart-view' %}">Cart</a></li>
+  <li>
+    <form action="{% url 'search' %}" method="get" style="display:inline;">
+      <input type="text" name="q" placeholder="Search books..." required style="padding:2px 6px;">
+      <button type="submit" style="padding:2px 8px;">Search</button>
+    </form>
+  </li>
+  {% for item in item_list %}
     <li>
-       <form action="{% url 'search_books' %}" method="get" class="nav-search" style="display:inline;">
-          <input type="text" name="q" placeholder="Search books..." value="{{ request.GET.q|default:'' }}">
-          <button type="submit">Search</button>
-       </form>
+      <a href="{{ item.link }}">  {{ item.item }} </a>
     </li>
+  {% endfor %}
 {% endblock sidenav %}
 
 {% block content %}
     <h1>Display Books</h1>
    <table border="2" >
-             <tr>
-          <th>
-              Book Name
-          </th>
-          <th>
-              Book Price
-          </th>
-          <th>
-              User Name
-          </th>
-          <th>
-              Ratings
-          </th>
-      </tr>
-
-   {% for book in books %}
       <tr>
-         <td>
-        <a href="book_detail/{{ book.id }}">  {{ book.name }} </a>
-         </td>
-         <td>
-            {{ book.price }}
-         </td>
-
-          <td>
-            {{ book.username }}
-         </td>
-         <td>
-                                     {% if user.is_authenticated %}
-                                        {% if book.username and book.username == user %}
-                                           <div class="cannot-rate" style="font-size:0.9rem;margin-top:4px;color:#666;">You cannot rate your own book</div>
-                                        {% else %}
-                                           <div class="stars" aria-label="Rate {{ book.name }}">
-                                              <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="value" value="1">
-                                                 <button type="submit" class="star" title="Rate 1" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
-                                              </form>
-                                              <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="value" value="2">
-                                                 <button type="submit" class="star" title="Rate 2" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
-                                              </form>
-                                              <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="value" value="3">
-                                                 <button type="submit" class="star" title="Rate 3" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
-                                              </form>
-                                              <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="value" value="4">
-                                                 <button type="submit" class="star" title="Rate 4" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
-                                              </form>
-                                              <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
-                                                 {% csrf_token %}
-                                                 <input type="hidden" name="value" value="5">
-                                                 <button type="submit" class="star" title="Rate 5" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
-                                              </form>
-                                           </div>
-                                        {% endif %}
-                                     {% else %}
-                                        <div style="font-size:0.9rem;margin-top:4px;"><a href="{% url 'login' %}?next={% url 'displaybooks' %}">Log in to rate</a></div>
-                                     {% endif %}
-                     <div class="rating-summary" style="font-size:0.9rem;margin-top:4px;">
-                        Average Rating: {% if book.avg_rating %}{{ book.avg_rating|floatformat:1 }}{% else %}&mdash;{% endif %} / 5 — out of {{ book.rating_count|default:0 }} reviews
-                     </div>
-                              {% if user.is_authenticated and user.is_superuser %}
-                                 <div style="margin-top:6px;">
-                                    <form method="post" action="{% url 'book_delete' book.id %}" style="display:inline;">
-                                       {% csrf_token %}
-                                       <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;cursor:pointer;">Delete</button>
-                                    </form>
-                                 </div>
-                              {% endif %}
-         </td>
-
-
+        <th>Book Name</th>
+        <th>Book Price</th>
+        <th>User Name</th>
+        <th>Ratings</th>
       </tr>
-   {% endfor %}
+      {% for book in books %}
+        <tr>
+          <td>
+            <a href="{% url 'book-detail' book.id %}" style="display:flex;align-items:center;gap:10px;">
+              {% if book.pic_path %}
+                <img src="{% static book.pic_path %}" alt="{{ book.name }}" width="64" style="object-fit:cover;border-radius:4px;"> 
+              {% endif %}
+              <span>{{ book.name }}</span>
+            </a>
+          </td>
+          <td>{{ book.price }}</td>
+          <td>{{ book.username }}</td>
+          <td>
+            {% if user.is_authenticated %}
+              {% if book.username and book.username == user %}
+                <div class="cannot-rate" style="font-size:0.9rem;margin-top:4px;color:#666;">You cannot rate your own book</div>
+              {% else %}
+                <div class="stars" aria-label="Rate {{ book.name }}">
+                  {% for i in "12345" %}
+                    <form method="post" action="{% url 'book_rating' book.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="value" value="{{ forloop.counter }}">
+                      <button type="submit" class="star" title="Rate {{ forloop.counter }}" style="background:none;border:none;padding:0;font-size:1.25rem;cursor:pointer;">★</button>
+                    </form>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <div style="font-size:0.9rem;margin-top:4px;"><a href="{% url 'login' %}?next={% url 'displaybooks' %}">Log in to rate</a></div>
+            {% endif %}
+            <div class="rating-summary" style="font-size:0.9rem;margin-top:4px;">
+              Average Rating: {% if book.avg_rating %}{{ book.avg_rating|floatformat:1 }}{% else %}&mdash;{% endif %} / 5 — out of {{ book.rating_count|default:0 }} reviews
+            </div>
+            <!-- Add-to-cart quantity + button -->
+            <form action="{% url 'cart-add' book.id %}" method="post" style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+              {% csrf_token %}
+              <label for="qty-{{ book.id }}" style="font-size:0.85rem;color:#333;">Qty</label>
+              <input id="qty-{{ book.id }}" type="number" name="quantity" value="1" min="1" style="width:56px;padding:4px;border:1px solid #ccc;border-radius:4px;">
+              <button type="submit" style="padding:6px 10px;background:#28a745;color:#fff;border:none;border-radius:4px;cursor:pointer;">Add to Cart</button>
+            </form>
+            {% if user.is_authenticated and user.is_superuser %}
+              <div style="margin-top:6px;">
+                <form method="post" action="{% url 'book_delete' book.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;cursor:pointer;">Delete</button>
+                </form>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">No books yet.</td></tr>
+      {% endfor %}
    </table>
 {% endblock content %}
