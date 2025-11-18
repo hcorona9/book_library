@@ -4,35 +4,75 @@
 {% block banner_title %}Books for Sale{% endblock %}
 
 {% block sidenav %}
+   <li><a href="{% url 'index' %}">Home</a></li>
+   <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
+   <li><a href="{% url 'mybooks' %}">My Books</a></li>
+   <li><a href="{% url 'postbook' %}">Post Book</a></li>
+   <li><a href="{% url 'about' %}">About</a></li>
    <li><a href="{% url 'cart-view' %}">Cart</a></li>
    <li>
       <form action="{% url 'search' %}" method="get" style="display:inline;">
-         <input type="text" name="q" placeholder="Search books..." required style="padding:2px 6px;">
+         <input type="text" name="q" placeholder="Search..." required style="padding:2px 6px;">
          <button type="submit" style="padding:2px 8px;">Search</button>
       </form>
    </li>
-   {% for item in item_list %}
-       <li>
-          <a href="{{ item.link }}">  {{ item.item }} </a>
-       </li>
-   {% endfor %}
 {% endblock sidenav %}
 
 {% block content %}
-  <h1>Post Book</h1>
-  {% if submitted %}
-      <h1> Post Book Successfully! </h1>
-  {% else %}
-    <form action="" enctype="multipart/form-data" method="post" novalidate>
-      <table>
-         {{ form.as_table }}
-          <tr>
-             <td>
-                 <input type="submit" value="Submit">
-             </td>
-          </tr>
-      </table>
-      {% csrf_token %}
-     </form>
-  {% endif %}
+  <div class="container-fluid">
+    <h1 class="mb-4"><i class="bi bi-book"></i> Post Book</h1>
+    {% if submitted %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> Book posted successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <a href="{% url 'displaybooks' %}" class="btn btn-primary">View All Books</a>
+      <a href="{% url 'postbook' %}" class="btn btn-secondary">Post Another Book</a>
+    {% else %}
+      <div class="card" style="max-width: 600px;">
+        <div class="card-body">
+          <form action="" enctype="multipart/form-data" method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="text-danger">{{ form.name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.web.id_for_label }}" class="form-label">{{ form.web.label }}</label>
+              {{ form.web }}
+              {% if form.web.errors %}
+                <div class="text-danger">{{ form.web.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.price.id_for_label }}" class="form-label">{{ form.price.label }}</label>
+              {{ form.price }}
+              {% if form.price.errors %}
+                <div class="text-danger">{{ form.price.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.picture.id_for_label }}" class="form-label">{{ form.picture.label }}</label>
+              {{ form.picture }}
+              {% if form.picture.errors %}
+                <div class="text-danger">{{ form.picture.errors }}</div>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-upload"></i> Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  
+  <style>
+    .form-control, .form-select {
+      width: 100%;
+    }
+  </style>
 {% endblock content %}

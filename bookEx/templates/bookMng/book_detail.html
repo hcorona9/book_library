@@ -1,36 +1,88 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block sidenav %}
+  <li><a href="{% url 'index' %}">Home</a></li>
+  <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
+  <li><a href="{% url 'mybooks' %}">My Books</a></li>
+  <li><a href="{% url 'postbook' %}">Post Book</a></li>
+  <li><a href="{% url 'about' %}">About</a></li>
+  <li><a href="{% url 'cart-view' %}">Cart</a></li>
+  <li>
+    <form action="{% url 'search' %}" method="get" style="display:inline;">
+      <input type="text" name="q" placeholder="Search..." required style="padding:2px 6px;">
+      <button type="submit" style="padding:2px 8px;">Search</button>
+    </form>
+  </li>
+{% endblock sidenav %}
 
 {% block content %}
-  <h1>{{ book.name }}</h1>
-  <p>Price: {{ book.price }}</p>
-  <p>Posted by: {{ book.username }}</p>
-  <p>Average Rating: {% if avg_rating %}{{ avg_rating|floatformat:1 }}{% else %}&mdash;{% endif %} / 5 — out of {{ rating_count|default:0 }} reviews</p>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8">
+        <h1 class="mb-3">{{ book.name }}</h1>
+        
+        <div class="card mb-4">
+          <div class="card-body">
+            <p class="card-text"><strong>Price:</strong> ${{ book.price }}</p>
+            <p class="card-text"><strong>Posted by:</strong> {{ book.username|default:"Anonymous" }}</p>
+            <p class="card-text"><strong>Website:</strong> <a href="{{ book.web }}" target="_blank">{{ book.web }}</a></p>
+            <div class="d-flex align-items-center gap-2">
+              <strong>Average Rating:</strong>
+              <span class="badge bg-warning text-dark">
+                {% if avg_rating %}{{ avg_rating|floatformat:1 }}{% else %}&mdash;{% endif %}/5
+              </span>
+              <span class="text-muted">({{ rating_count|default:0 }} reviews)</span>
+            </div>
+          </div>
+        </div>
 
-  <h2>Reviews</h2>
-  {% for review in reviews %}
-    <div>
-      <strong>{{ review.reviewer_name }}</strong> rated <strong>{{ review.rating }}</strong><br>
-      {{ review.comment }}<br>
-      <small>{{ review.created_at }}</small>
+        <h2 class="mb-3">Reviews</h2>
+        {% for review in reviews %}
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h5 class="card-title">{{ review.reviewer_name }}</h5>
+                  <div class="mb-2">
+                    {% for i in "12345" %}
+                      <i class="bi bi-star{% if forloop.counter <= review.rating %}-fill{% endif %} text-warning"></i>
+                    {% endfor %}
+                    <span class="badge bg-info">{{ review.rating }}/5</span>
+                  </div>
+                  <p class="card-text">{{ review.comment }}</p>
+                </div>
+              </div>
+              <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
+            </div>
+          </div>
+        {% empty %}
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No reviews yet. Be the first to review!
+          </div>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+          <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+              <h3 class="mb-0">Leave a Review</h3>
+            </div>
+            <div class="card-body">
+              <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-send"></i> Submit Review
+                </button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-warning mt-4">
+            <i class="bi bi-exclamation-triangle"></i> <a href="{% url 'login' %}?next={{ request.path }}" class="alert-link">Log in</a> to leave a review.
+          </div>
+        {% endif %}
+      </div>
     </div>
-  {% empty %}
-    <p>No reviews yet.</p>
-  {% endfor %}
-
-  {% if user.is_authenticated %}
-    <h3>Leave a Review</h3>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Submit</button>
-    </form>
-  {% else %}
-    <h3>Leave a Review</h3>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.reviewer_name.label_tag }} {{ form.reviewer_name }}<br>
-      {{ form.comment.label_tag }} {{ form.comment }}<br>
-      <button type="submit">Submit</button>
-    </form>
-  {% endif %}
+  </div>
 {% endblock content %}

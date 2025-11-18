@@ -156,7 +156,17 @@ def mybooks(request):
                       'books': books
                   })
 def book_delete(request, book_id):
-    book = Book.objects.get(id=book_id)
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Check if user is authenticated and either owns the book or is superuser
+    if not request.user.is_authenticated:
+        messages.error(request, "You must be logged in to delete a book.")
+        return redirect('login')
+    
+    if book.username != request.user and not request.user.is_superuser:
+        messages.error(request, "You don't have permission to delete this book.")
+        return redirect('displaybooks')
+    
     book.delete()
 
     return render(request,

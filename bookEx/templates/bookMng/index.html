@@ -2,13 +2,33 @@
 {% load static %}
 
 {% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
+   <li><a href="{% url 'index' %}">Home</a></li>
+   <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
+   <li><a href="{% url 'mybooks' %}">My Books</a></li>
+   <li><a href="{% url 'postbook' %}">Post Book</a></li>
+   <li><a href="{% url 'about' %}">About</a></li>
+   <li><a href="{% url 'cart-view' %}">Cart</a></li>
+   <li>
+      <form action="{% url 'search' %}" method="get" style="display:inline;">
+         <input type="text" name="q" placeholder="Search..." required style="padding:2px 6px;">
+         <button type="submit" style="padding:2px 8px;">Search</button>
+      </form>
+   </li>
 {% endblock sidenav %}
 
 {% block content %}
-   <h1>Welcome to Book Exchange System</h1>
+   <div class="container-fluid">
+      <div class="jumbotron bg-light p-5 rounded-3">
+         <h1 class="display-4"><i class="bi bi-book"></i> Welcome to Book Exchange System</h1>
+         <p class="lead">Buy, sell, and discover books from our community!</p>
+         <hr class="my-4">
+         <p>Browse our collection, post your own books, and connect with fellow book lovers.</p>
+         <a class="btn btn-primary btn-lg" href="{% url 'displaybooks' %}" role="button">
+            <i class="bi bi-search"></i> Browse Books
+         </a>
+         <a class="btn btn-success btn-lg" href="{% url 'postbook' %}" role="button">
+            <i class="bi bi-plus-circle"></i> Post a Book
+         </a>
+      </div>
+   </div>
 {% endblock content %}

@@ -2,35 +2,73 @@
 {% load static %}
 
 {% block sidenav %}
-  {% for item in item_list %}
-    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
-  {% endfor %}
+  <li><a href="{% url 'index' %}">Home</a></li>
+  <li><a href="{% url 'displaybooks' %}">Display Books</a></li>
+  <li><a href="{% url 'mybooks' %}">My Books</a></li>
+  <li><a href="{% url 'postbook' %}">Post Book</a></li>
+  <li><a href="{% url 'about' %}">About</a></li>
+  <li><a href="{% url 'cart-view' %}">Cart</a></li>
+  <li>
+    <form action="{% url 'search' %}" method="get" style="display:inline;">
+      <input type="text" name="q" placeholder="Search..." required style="padding:2px 6px;">
+      <button type="submit" style="padding:2px 8px;">Search</button>
+    </form>
+  </li>
 {% endblock sidenav %}
 
 {% block content %}
-  <h1>Search Books</h1>
-  <form method="get">
-    {{ form.q }}
-    <button type="submit">Search</button>
-  </form>
+  <div class="container-fluid">
+    <h1 class="mb-4"><i class="bi bi-search"></i> Search Books</h1>
+    <form method="get" class="mb-4">
+      <div class="input-group" style="max-width: 500px;">
+        {{ form.q }}
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i> Search
+        </button>
+      </div>
+    </form>
 
-  {% if query %}
-    <h3>Results for "{{ query }}":</h3>
-    {% if books %}
-      <ul>
-        {% for b in books %}
-          <li>
-            <a href="{% url 'book-detail' b.pk %}">{{ b.title }}</a>
-            — {{ b.author }} ({{ b.isbn }})
-            <form action="{% url 'cart-add' b.pk %}" method="post" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit">Add to Cart</button>
-            </form>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No matching books.</p>
+    {% if query %}
+      <h3 class="mb-3">Results for "{{ query }}":</h3>
+      {% if books %}
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Book Name</th>
+                <th>Price</th>
+                <th>Website</th>
+                <th>Posted By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in books %}
+                <tr>
+                  <td>
+                    <a href="{% url 'book-detail' b.pk %}" class="text-decoration-none">{{ b.name }}</a>
+                  </td>
+                  <td>${{ b.price }}</td>
+                  <td><a href="{{ b.web }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-link-45deg"></i> Link</a></td>
+                  <td>{{ b.username|default:"Anonymous" }}</td>
+                  <td>
+                    <form action="{% url 'cart-add' b.pk %}" method="post" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle"></i> No matching books found.
+        </div>
+      {% endif %}
     {% endif %}
-  {% endif %}
+  </div>
 {% endblock content %}
