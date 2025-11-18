@@ -40,7 +40,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.reviewer_name} rated {self.book.title} {self.rating}"
+        return f"{self.reviewer_name} rated {self.book.name} {self.rating}"
 
 
 class Message(models.Model):
