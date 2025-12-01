@@ -1,56 +1,124 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
-{% endblock sidenav %}
+{% block title %}{{ book.title }} – Details{% endblock %}
 
 {% block content %}
-   <h1>Book Detail</h1>
-   <table border="2" >
-      <tr>
-          <th>
-              Book Picture
-          </th>
-          <th>
-              Book Name
-          </th>
-          <th>
-              Book Price
-          </th>
-          <th>
-              User Name
-          </th>
-          <th>
-              Book Post Date
-          </th>
-          <th>
-              Book Web
-          </th>
-      </tr>
-       <tr>
-           <td>
-           <img src="{% static book.pic_path %}" width="100" />
-         </td>
-         <td>
-            {{ book.name }}
-         </td>
-         <td>
-            {{ book.price }}
-         </td>
-          <td>
-            {{ book.username }}
-         </td>
-           <td>
-            {{ book.publishdate }}
-         </td>
-           <td>
-               {{ book.web }}
-           </td>
-      </tr>
-   </table>
-{% endblock content %}
+<div class="detail-layout">
+    <div class="detail-cover">
+        {% if book.image %}
+            <img src="{{ book.image.url }}" alt="{{ book.title }}">
+        {% endif %}
+    </div>
+
+    <div class="detail-info">
+        <h2 class="detail-title">{{ book.title }}</h2>
+
+        <div class="detail-meta">
+            <span class="detail-author">{{ book.author }}</span>
+            {% if book.year %}
+                <span class="detail-dot">•</span>
+                <span class="detail-year">{{ book.year }}</span>
+            {% endif %}
+            {% if book.isbn %}
+                <br>
+                <span class="detail-isbn">ISBN: {{ book.isbn }}</span>
+            {% endif %}
+        </div>
+
+        {% if avg %}
+            <div class="rating">
+                <div class="rating-stars">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= avg|floatformat:0 %}
+                            <span class="star filled">★</span>
+                        {% else %}
+                            <span class="star">☆</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="rating-text">{{ avg }} / 5</span>
+            </div>
+        {% endif %}
+
+        <div class="detail-description">
+            <p>{{ book.description }}</p>
+        </div>
+
+        <div class="detail-actions">
+            <!-- Add to Cart -->
+            <form method="post" action="{% url 'add_to_cart' book.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-accent">Add to Cart</button>
+            </form>
+
+            <!-- Favorites Heart -->
+            {% if user.is_authenticated %}
+                <form method="post"
+                      action="{% url 'toggle_favorite' book.id %}?next={{ request.path }}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="favorite-btn {% if is_favorite %}is-favorite{% endif %}">
+                        <span class="heart-icon">&hearts;</span>
+                        {% if is_favorite %}
+                            Remove from Favorites
+                        {% else %}
+                            Add to Favorites
+                        {% endif %}
+                    </button>
+                </form>
+            {% else %}
+                <p class="favorite-hint">
+                    <a href="{% url 'login' %}?next={{ request.path }}">
+                        Log in
+                    </a>
+                    to add this book to your favorites.
+                </p>
+            {% endif %}
+
+            <a href="{% url 'displaybooks' %}" class="btn-secondary">Back to list</a>
+        </div>
+    </div>
+</div>
+
+<div class="comments-section">
+    <h3>Reviews</h3>
+
+    {% if reviews %}
+        {% for c in reviews %}
+            <div class="comment">
+                <div class="comment-header">
+                    <span class="comment-author">{{ c.user.username }}</span>
+                    <span class="comment-meta">
+                        {{ c.created_at|date:"M j, Y" }}
+                        {% if c.rating %} · Rating: {{ c.rating }}/5{% endif %}
+                    </span>
+                </div>
+                <p class="comment-text">{{ c.text }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No comments yet.</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <h4 class="comment-form-title">Leave a review</h4>
+        <form method="post" class="comment-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Rating (1–5)</label>
+                {{ form.rating }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Comment</label>
+                {{ form.text }}
+            </div>
+
+            <button type="submit" class="btn-primary">Submit</button>
+        </form>
+    {% else %}
+        <p>You must be logged in to leave a comment.</p>
+    {% endif %}
+</div>
+{% endblock %}

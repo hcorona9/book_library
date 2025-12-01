@@ -1,32 +1,25 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block banner_title %}About Us{% endblock %}
-
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'displaybook.css' %}">
-{% endblock %}
-
-{% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
-{% endblock sidenav %}
+{% block title %}About{% endblock %}
 
 {% block content %}
-  <h1>About Us</h1>
-  <p>Welcome to Book Keep. This is a simple demo application for posting and rating books.</p>
-  <p>You can add your own content here — team info, mission, contact details, etc.</p>
-  <p>Here are the names of the people who worked on this project:</p>
-    <h2>Team</h2>
-    <ul>
-      <li><a href="{% url 'person' 'hector-corona' %}">Hector Corona</a> — Software Developer</li>
-      <li><a href="{% url 'person' 'kevin-luo' %}">Kevin Luo</a> — Software Developer</li>
-      <li><a href="{% url 'person' 'esmeralda-amado' %}">Esmeralda Amado</a> — Software Developer</li>
-      <li><a href="{% url 'person' 'evelyn-muneton' %}">Evelyn Muneton</a> — Software Developer</li>
-      <li><a href="{% url 'person' 'raquel-alvarado' %}">Raquel Alvarado</a> — Software Developer</li>
-      <li><a href="{% url 'person' 'brian-gonzales' %}">Brian Gonzales</a> — MIA</li>
-    </ul>
-{% endblock content %}
+<h1 class="page-title">About This Project</h1>
+<p class="page-subtitle">
+    CS3337 – Group 1 Book Library web application built with Python, Django, HTML, CSS, and PyCharm.
+</p>
+
+<p>
+    This site allows users to browse books, search the catalog, leave comments and ratings,
+    and add items to a shopping cart. The project was developed collaboratively as part of our
+    second draft submission.
+</p>
+
+<ul>
+    <li>Raquel Alvarado-Salazar</li>
+    <li>Esmeralda Amado</li>
+    <li>Hector Corona</li>
+    <li>Brian Gonzalez Salazar</li>
+    <li>Kevin Luo</li>
+    <li>Evelyn Muneton</li>
+</ul>
+{% endblock %}

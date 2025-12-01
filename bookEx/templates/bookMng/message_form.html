@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Contact Group 1</h1>
+<p class="page-subtitle">
+    Send us any questions or feedback about the Book Library application.
+</p>
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">Name</label>
+            {{ form.name }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+        <div class="form-group">
+            <label class="form-label">Message</label>
+            {{ form.message }}
+        </div>
+        <button type="submit" class="btn-primary">Send message</button>
+    </form>
+</div>
+{% endblock %}

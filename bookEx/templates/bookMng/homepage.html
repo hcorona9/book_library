@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Home – Book Library{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Welcome to Book Library</h1>
+<p class="page-subtitle">
+    Browse our collection, add favorites to your cart, leave reviews, and keep track of your books.
+</p>
+
+<div style="display:flex; flex-wrap:wrap; gap:18px; margin-top:16px;">
+    <div class="book-card" style="flex:1 1 260px;">
+        <h2 class="book-title">Browse the Catalog</h2>
+        <p class="book-meta">
+            See all available books, filter by title or author, and open each book’s detail page.
+        </p>
+        <a href="{% url 'displaybooks' %}" class="btn-primary">Browse Books</a>
+    </div>
+
+    <div class="book-card" style="flex:1 1 260px;">
+        <h2 class="book-title">Shopping Cart</h2>
+        <p class="book-meta">
+            Add books to your cart and manage quantities before checking out.
+        </p>
+        <a href="{% url 'cart' %}" class="btn-secondary">View Cart</a>
+    </div>
+
+    <div class="book-card" style="flex:1 1 260px;">
+        <h2 class="book-title">Your Library</h2>
+        <p class="book-meta">
+            View books associated with your account and your previous interactions.
+        </p>
+        <a href="{% url 'mybooks' %}" class="btn-secondary">My Books</a>
+    </div>
+</div>
+{% endblock %}

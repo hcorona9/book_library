@@ -1,31 +1,31 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block banner_title %}Books for Sale{% endblock %}
-
 {% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
+  {% if item_list %}
+    {% for item in item_list %}
+      <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+    {% endfor %}
+  {% endif %}
 {% endblock sidenav %}
 
 {% block content %}
   <h1>Post Book</h1>
+
   {% if submitted %}
-      <h1> Post Book Successfully! </h1>
+    <h2>Post Book Successfully!</h2>
+    <p><a href="{% url 'home' %}">Back to list</a> | <a href="{% url 'post-book' %}">Post another</a></p>
   {% else %}
-    <form action="" enctype="multipart/form-data" method="post" novalidate>
-      <table>
-         {{ form.as_table }}
-          <tr>
-             <td>
-                 <input type="submit" value="Submit">
-             </td>
-          </tr>
-      </table>
+    <form action="" method="post" novalidate>
       {% csrf_token %}
-     </form>
+      <table>
+        {{ form.as_table }}
+        <tr>
+          <td colspan="2">
+            <input type="submit" value="Submit">
+          </td>
+        </tr>
+      </table>
+    </form>
   {% endif %}
 {% endblock content %}

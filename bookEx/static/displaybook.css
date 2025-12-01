@@ -7,7 +7,6 @@
 .stars .star:focus,
 .stars .star:active { color: #f5b301; outline: none; }
 
-/* Make the star buttons inherit font and remove default button styles */
 .stars form { display: inline; }
 
 .cannot-rate { font-size:0.9rem; margin-top:4px; color:#666; }

@@ -1,15 +1,13 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% load static %}
 
 {% block sidenav %}
-      <li>
-        <a href="/">  Home </a>
-      </li>
+  <li><a href="/">Home</a></li>
 {% endblock sidenav %}
 
 {% block content %}
   <h1>User Registration Success!</h1>
   <p>
-      To login <a href="{% url 'login' %}?next=/"> Click Here</a>
+    To log in, <a href="{% url 'login' %}?next=/">click here</a>.
   </p>
-{% endblock content %}t
+{% endblock content %}

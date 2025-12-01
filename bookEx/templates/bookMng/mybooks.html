@@ -2,37 +2,40 @@
 {% load static %}
 
 {% block sidenav %}
-   {% for item in item_list %}
-      <li>
-        <a href="{{ item.link }}">  {{ item.item }} </a>
-      </li>
-   {% endfor %}
+  {% if item_list %}
+    {% for item in item_list %}
+      <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+    {% endfor %}
+  {% endif %}
 {% endblock sidenav %}
 
 {% block content %}
-    <h1>My Books</h1>
-    {% if user.is_authenticated %}
-       <table border="2">
-          <tr>
-             <th>Book Name</th>
-             <th>Book Price</th>
-             <th>User Name</th>
-             <th>DELETE</th>
-          </tr>
-          {% for book in books %}
-             <tr>
-                <td><a href="book_detail/{{ book.id }}">{{ book.name }}</a></td>
-                <td>{{ book.price }}</td>
-                <td>{{ book.username }}</td>
-                <td><a href="book_delete/{{ book.id }}">DELETE</a></td>
-             </tr>
-          {% empty %}
-             <tr>
-                <td colspan="4">You have no books posted.</td>
-             </tr>
-          {% endfor %}
-       </table>
-    {% else %}
-       <p>Log in to see your books. <a href="{% url 'login' %}?next={% url 'mybooks' %}">Log in</a></p>
-    {% endif %}
+  <h1>My Books</h1>
+
+  {% if books %}
+    <table border="2" cellpadding="6">
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>ISBN</th>
+        <th>Detail</th>
+        <th>Delete</th>
+      </tr>
+      {% for book in books %}
+      <tr>
+        <td>{{ book.title }}</td>
+        <td>{{ book.author }}</td>
+        <td>{{ book.isbn }}</td>
+        <td>
+          <a href="{% url 'book-detail' book.pk %}">View</a>
+        </td>
+        <td>
+          <a href="{% url 'book-delete' book.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No books yet.</p>
+  {% endif %}
 {% endblock content %}
